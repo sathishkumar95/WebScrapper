@@ -22,7 +22,7 @@ def getresponseobj(url):
 
 
 def connectdb():
-    connect_str = "dbname='justdial' user='intern' host='34.211.197.118' password='prime123'"
+    connect_str = "dbname='justdial' user='crawler' host='' password='prime123'"
     conn = psycopg2.connect(connect_str)
     conn.autocommit = True
     cursor = conn.cursor()
