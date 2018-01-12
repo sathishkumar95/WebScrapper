@@ -1,44 +1,44 @@
-from urllib.request import urlopen as uReq
-from bs4 import BeautifulSoup as soup 
+# Assume that the comments are stored in file comments.txt
+# assume that the profanity words are stored in file profanity.txt
 
-my_url = 'https://www.newegg.com/global/in/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=graphics+card&N=-1&isNodeId=1'
 
-uClient = uReq(my_url)
-page_html = uClient.read()
-uClient.close()
+from string import punctuation
 
-#html parsing
+profanity_words = ["stfu","bitch","wtf","gtfo","ass","stfu"]
 
-page_soup = soup(page_html,"html.parser")
 
-#grabs each product
+def process_word(word):
+    word = word.lstrip()
+    word = word.strip()
+    word = word.lower()
+    return word
 
-containers = page_soup.findAll("div",{"class":"item-container"})
 
-#creating and writing into a file
+def process_sentence(sentence, line):
+    profanity_counter = 0
+    for p in list(punctuation):
+        sentence = sentence.replace(p,'')
+    words = sentence.split(' ')
+    words_count = len(words)
+    for word in words:
+        word = process_word(word)
+        if word in profanity_words:
+            profanity_counter = profanity_counter+1
+    print("Profanity in "+str(line)+" th sentence is "+str((profanity_counter/words_count)*100)+" %")
 
-filename = "product.csv"
 
-f = open(filename,"w")
+def divide_sentence(data):
+    line = 0
+    list_of_comments = data.split('.')
+    for sentence in list_of_comments:
+        sentence.strip()
+        if sentence:
+            line = line + 1
+            process_sentence(sentence, line)
 
-headers = "brand, product_name, shipping \n"
 
-f.write(headers)
+if __name__ == "__main__":
 
-for container in containers:
-	brand = container.div.div.a.img["title"]
-
-	title_container = container.findAll("a",{"class":"item-title"})
-	product_name = title_container[0].text
-
-	shipping_container = container.findAll("li",{"class":"price-ship"})
-	shipping = shipping_container[0].text.strip()
-
-	print("brand : "+brand)
-	print("product_name : "+product_name)
-	print("shipping : "+shipping)
-	f.write(brand+ "," +product_name.replace(",","|")+ "," +shipping+ "\n")
-
-f.close()
-	
-	
+    with open("comments.txt","r") as f:
+        data = f.read()
+        divide_sentence(data)
